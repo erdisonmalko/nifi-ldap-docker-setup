@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<loginIdentityProviders>
+    <provider>
+        <identifier>ldap-provider</identifier>
+        <class>org.apache.nifi.ldap.LdapProvider</class>
+        <property name="Authentication Strategy">SIMPLE</property>
+        
+        <property name="Manager DN">cn=admin,dc=nifi,dc=local</property>
+        <property name="Manager Password">admin</property>
+        
+        <property name="Referral Strategy">FOLLOW</property>
+        <property name="Connect Timeout">10 secs</property>
+        <property name="Read Timeout">10 secs</property>
+        
+        <property name="Url">ldap://openldap:389</property>
+        <property name="User Search Base">ou=users,dc=nifi,dc=local</property>
+        <property name="User Search Filter">uid={0}</property>
+        
+        <property name="Authentication Expiration">12 hours</property>
+    </provider>
+</loginIdentityProviders>

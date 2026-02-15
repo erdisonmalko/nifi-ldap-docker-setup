@@ -1,0 +1,81 @@
+services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: nifi-openldap
+    environment:
+      LDAP_ORGANISATION: "NiFi Org"
+      LDAP_DOMAIN: "nifi.local"
+      LDAP_ADMIN_PASSWORD: "admin"
+    ports:
+      - "389:389"
+    volumes:
+      - openldap-data:/var/lib/ldap
+      - ./ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service
+    networks:
+      - nifi-net
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    container_name: nifi-phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "8081:80"
+    depends_on:
+      - openldap
+    networks:
+      - nifi-net
+
+  nifi-registry:
+    image: apache/nifi-registry:1.27.0
+    container_name: nifi-registry
+    ports:
+      - "18080:18080"
+    volumes:
+      - registry-data:/opt/nifi-registry/nifi-registry-current/database
+      - registry-flows:/opt/nifi-registry/nifi-registry-current/flow_storage
+    networks:
+      - nifi-net
+
+  nifi:
+    image: apache/nifi:2.0.0
+    container_name: nifi
+    ports:
+      - "8443:8443"
+    environment:
+      # Initial single-user auth (will switch to LDAP later)
+      SINGLE_USER_CREDENTIALS_USERNAME: admin
+      SINGLE_USER_CREDENTIALS_PASSWORD: adminpassword123
+      # Memory settings
+      NIFI_JVM_HEAP_INIT: 2g
+      NIFI_JVM_HEAP_MAX: 4g
+    volumes:
+      # Mount entire conf directory as volume (NiFi has full control)
+      - nifi-conf:/opt/nifi/nifi-current/conf
+      - nifi-data:/opt/nifi/nifi-current/database_repository
+      - nifi-flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi-content:/opt/nifi/nifi-current/content_repository
+      - nifi-provenance:/opt/nifi/nifi-current/provenance_repository
+      - nifi-logs:/opt/nifi/nifi-current/logs
+    depends_on:
+      - openldap
+      - nifi-registry
+    networks:
+      - nifi-net
+
+volumes:
+  openldap-data:
+  nifi-conf:
+  nifi-data:
+  nifi-flowfile:
+  nifi-content:
+  nifi-provenance:
+  nifi-logs:
+  registry-data:
+  registry-flows:
+
+networks:
+  nifi-net:
+    driver: bridge

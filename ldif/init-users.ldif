@@ -1,0 +1,74 @@
+# Create organizational units
+dn: ou=users,dc=nifi,dc=local
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=nifi,dc=local
+objectClass: organizationalUnit
+ou: groups
+
+# Create users
+dn: cn=superAdmin,ou=users,dc=nifi,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: superAdmin
+sn: Admin
+uid: superAdmin
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/superAdmin
+userPassword: password123
+
+dn: cn=user1,ou=users,dc=nifi,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: user1
+sn: User1
+uid: user1
+uidNumber: 10002
+gidNumber: 10002
+homeDirectory: /home/user1
+userPassword: password123
+
+dn: cn=user2,ou=users,dc=nifi,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: user2
+sn: User2
+uid: user2
+uidNumber: 10003
+gidNumber: 10003
+homeDirectory: /home/user2
+userPassword: password123
+
+dn: cn=user3,ou=users,dc=nifi,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: user3
+sn: User3
+uid: user3
+uidNumber: 10004
+gidNumber: 10004
+homeDirectory: /home/user3
+userPassword: password123
+
+# Create groups
+dn: cn=admins,ou=groups,dc=nifi,dc=local
+objectClass: groupOfNames
+cn: admins
+member: cn=superAdmin,ou=users,dc=nifi,dc=local
+
+dn: cn=teamA,ou=groups,dc=nifi,dc=local
+objectClass: groupOfNames
+cn: teamA
+member: cn=user1,ou=users,dc=nifi,dc=local
+member: cn=user2,ou=users,dc=nifi,dc=local
+
+dn: cn=teamB,ou=groups,dc=nifi,dc=local
+objectClass: groupOfNames
+cn: teamB
+member: cn=user3,ou=users,dc=nifi,dc=local
