@@ -225,6 +225,30 @@ Write-Host "`n========================================================" -Foregro
 Write-Host "              Setup Complete!                           " -ForegroundColor Green
 Write-Host "========================================================`n" -ForegroundColor Green
 
+# Step 9: Configure Registry (optional)
+Write-Host "Step 9: Configuring NiFi Registry connection (optional)" -ForegroundColor Cyan
+Write-Host "-------------------------------------------------------`n" -ForegroundColor DarkGray
+
+if (Test-Path ".\scripts\linux\configure-registry.sh") {
+    Write-Host "Running Registry configuration..." -ForegroundColor Yellow
+    $ErrorActionPreference = "Continue"
+    bash ./scripts/linux/configure-registry.sh 2>&1 | Out-Null
+    $registryResult = $LASTEXITCODE
+    $ErrorActionPreference = "Stop"
+    
+    if ($registryResult -eq 0) {
+        Write-Host "[OK] Registry connected to NiFi" -ForegroundColor Green
+    } else {
+        Write-Host "[SKIP] Registry configuration skipped (add manually if needed)`n" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[SKIP] Registry script not found (add connection manually)`n" -ForegroundColor Yellow
+}
+
+Write-Host "`n========================================================" -ForegroundColor Green
+Write-Host "              All Done!                                 " -ForegroundColor Green
+Write-Host "========================================================`n" -ForegroundColor Green
+
 Write-Host "NiFi:          " -NoNewline -ForegroundColor White
 Write-Host "https://localhost:8443/nifi" -ForegroundColor Cyan
 
