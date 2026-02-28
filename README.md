@@ -1,6 +1,3 @@
-## NOTES:
-### UPDATE COMPOSE FILE TO USE CUSTOM IMAGES - ADD THE NEEDED FOLDERS AND DOCKERFILE'S
-
 # NiFi Multi-User Docker Setup
 
 Complete guide to set up Apache NiFi with LDAP authentication for multi-user environments.

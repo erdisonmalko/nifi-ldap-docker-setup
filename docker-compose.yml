@@ -1,20 +1,35 @@
 services:
+  # OpenLDAP - User Authentication
   openldap:
     image: osixia/openldap:1.5.0
     container_name: nifi-openldap
     environment:
-      LDAP_ORGANISATION: "NiFi Org"
+      LDAP_ORGANISATION: "NiFi Organization"
       LDAP_DOMAIN: "nifi.local"
       LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_CONFIG_PASSWORD: "config"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "false"
+      LDAP_REPLICATION: "false"
     ports:
       - "389:389"
+      - "636:636"
     volumes:
       - openldap-data:/var/lib/ldap
+      - openldap-config:/etc/ldap/slapd.d
       - ./ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
     command: --copy-service
     networks:
-      - nifi-net
+      - nifi-network
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=nifi,dc=local", "-D", "cn=admin,dc=nifi,dc=local", "-w", "admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
+  # phpLDAPadmin - Web UI for LDAP management
   phpldapadmin:
     image: osixia/phpldapadmin:0.9.0
     container_name: nifi-phpldapadmin
@@ -24,58 +39,92 @@ services:
     ports:
       - "8081:80"
     depends_on:
-      - openldap
+      openldap:
+        condition: service_healthy
     networks:
-      - nifi-net
+      - nifi-network
 
+  # NiFi Registry - Version control for flows
   nifi-registry:
     image: apache/nifi-registry:1.27.0
     container_name: nifi-registry
     ports:
       - "18080:18080"
+    environment:
+      NIFI_REGISTRY_WEB_HTTP_HOST: '0.0.0.0'
+      NIFI_REGISTRY_WEB_HTTP_PORT: '18080'
     volumes:
-      - registry-data:/opt/nifi-registry/nifi-registry-current/database
-      - registry-flows:/opt/nifi-registry/nifi-registry-current/flow_storage
+      - nifi-registry-database:/opt/nifi-registry/nifi-registry-current/database
+      - nifi-registry-flow-storage:/opt/nifi-registry/nifi-registry-current/flow_storage
     networks:
-      - nifi-net
+      - nifi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18080/nifi-registry"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
+  # Apache NiFi - Main application
   nifi:
     image: apache/nifi:2.0.0
     container_name: nifi
     ports:
-      - "8443:8443"
+      - "8443:8443"   # HTTPS UI
     environment:
-      # Initial single-user auth (will switch to LDAP later)
+      # Single User Auth (initial setup - will be replaced by LDAP)
       SINGLE_USER_CREDENTIALS_USERNAME: admin
       SINGLE_USER_CREDENTIALS_PASSWORD: adminpassword123
-      # Memory settings
+      
+      # JVM Settings
       NIFI_JVM_HEAP_INIT: 2g
       NIFI_JVM_HEAP_MAX: 4g
+      
+      # Web Settings
+      NIFI_WEB_HTTPS_HOST: '0.0.0.0'
+      NIFI_WEB_HTTPS_PORT: '8443'
     volumes:
-      # Mount entire conf directory as volume (NiFi has full control)
+      # Persistent data
       - nifi-conf:/opt/nifi/nifi-current/conf
-      - nifi-data:/opt/nifi/nifi-current/database_repository
+      - nifi-database:/opt/nifi/nifi-current/database_repository
       - nifi-flowfile:/opt/nifi/nifi-current/flowfile_repository
       - nifi-content:/opt/nifi/nifi-current/content_repository
       - nifi-provenance:/opt/nifi/nifi-current/provenance_repository
+      - nifi-state:/opt/nifi/nifi-current/state
       - nifi-logs:/opt/nifi/nifi-current/logs
+      
+      # Custom locations (not overwriting NiFi directories)
+      - ./drivers:/opt/nifi/nifi-current/drivers:ro
+      - ./output:/opt/nifi/nifi-current/output
+      - ./scripts:/opt/nifi/nifi-current/scripts:ro
+      - ./templates:/opt/nifi/nifi-current/templates:ro
     depends_on:
-      - openldap
-      - nifi-registry
+      openldap:
+        condition: service_healthy
+      # nifi-registry:
+      #   condition: service_healthy
     networks:
-      - nifi-net
+      - nifi-network
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:8443/nifi/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
 volumes:
   openldap-data:
+  openldap-config:
+  nifi-registry-database:
+  nifi-registry-flow-storage:
   nifi-conf:
-  nifi-data:
+  nifi-database:
   nifi-flowfile:
   nifi-content:
   nifi-provenance:
+  nifi-state:
   nifi-logs:
-  registry-data:
-  registry-flows:
 
 networks:
-  nifi-net:
+  nifi-network:
     driver: bridge

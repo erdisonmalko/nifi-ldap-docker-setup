@@ -1,5 +1,6 @@
 #!/bin/bash
 # Script to initialize LDAP with users after container starts
+# ./scripts/linux/init-ldap-users.sh
 
 echo "Waiting for OpenLDAP to be ready..."
 sleep 10

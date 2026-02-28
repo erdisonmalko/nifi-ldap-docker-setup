@@ -16,7 +16,7 @@ cn: superAdmin
 sn: Admin
 uid: superAdmin
 uidNumber: 10001
-gidNumber: 10001
+gidNumber: 5001
 homeDirectory: /home/superAdmin
 userPassword: password123
 
@@ -28,7 +28,7 @@ cn: user1
 sn: User1
 uid: user1
 uidNumber: 10002
-gidNumber: 10002
+gidNumber: 5002
 homeDirectory: /home/user1
 userPassword: password123
 
@@ -40,7 +40,7 @@ cn: user2
 sn: User2
 uid: user2
 uidNumber: 10003
-gidNumber: 10003
+gidNumber: 5002
 homeDirectory: /home/user2
 userPassword: password123
 
@@ -52,23 +52,26 @@ cn: user3
 sn: User3
 uid: user3
 uidNumber: 10004
-gidNumber: 10004
+gidNumber: 5003
 homeDirectory: /home/user3
 userPassword: password123
 
-# Create groups
+# Create groups - using only posixGroup (simpler, always works)
 dn: cn=admins,ou=groups,dc=nifi,dc=local
-objectClass: groupOfNames
+objectClass: posixGroup
 cn: admins
-member: cn=superAdmin,ou=users,dc=nifi,dc=local
+gidNumber: 5001
+memberUid: superAdmin
 
 dn: cn=teamA,ou=groups,dc=nifi,dc=local
-objectClass: groupOfNames
+objectClass: posixGroup
 cn: teamA
-member: cn=user1,ou=users,dc=nifi,dc=local
-member: cn=user2,ou=users,dc=nifi,dc=local
+gidNumber: 5002
+memberUid: user1
+memberUid: user2
 
 dn: cn=teamB,ou=groups,dc=nifi,dc=local
-objectClass: groupOfNames
+objectClass: posixGroup
 cn: teamB
-member: cn=user3,ou=users,dc=nifi,dc=local
+gidNumber: 5003
+memberUid: user3
