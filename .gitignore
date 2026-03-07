@@ -2,3 +2,4 @@
 DStore
 *.jar
 *.war
+.env
