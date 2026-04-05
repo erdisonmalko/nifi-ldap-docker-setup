@@ -256,7 +256,7 @@ Write-Host "LDAP Admin:    " -NoNewline -ForegroundColor White
 Write-Host "http://localhost:8081" -ForegroundColor Cyan
 
 Write-Host "NiFi Registry: " -NoNewline -ForegroundColor White
-Write-Host "http://localhost:18080`n" -ForegroundColor Cyan
+Write-Host "http://localhost:18080/nifi-registry`n" -ForegroundColor Cyan
 
 Write-Host "Users: " -NoNewline -ForegroundColor White
 Write-Host "superAdmin, user1, user2, user3" -ForegroundColor Yellow

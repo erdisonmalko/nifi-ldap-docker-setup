@@ -5,15 +5,13 @@
 set -e
 
 NIFI_URL="https://localhost:8443/nifi-api"
-REGISTRY_URL_CHECK="http://localhost:18080"        # For checking from host
-REGISTRY_URL_NIFI="http://nifi-registry:18080"     # For NiFi to use (Docker network)
+REGISTRY_URL_CHECK="http://localhost:18080"
+REGISTRY_URL_NIFI="http://nifi-registry:18080"
 REGISTRY_NAME="Local Registry"
 
-# Default credentials (can be overridden with environment variables)
 NIFI_USERNAME="${NIFI_USERNAME:-superAdmin}"
 NIFI_PASSWORD="${NIFI_PASSWORD:-password123}"
 
-# Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
@@ -23,7 +21,6 @@ echo "========================================"
 echo "NiFi Registry Auto-Configuration"
 echo "========================================"
 
-# Step 1: Wait for NiFi to be ready
 echo -e "\n${YELLOW}[1/5]${NC} Waiting for NiFi to be ready..."
 MAX_WAIT=60
 ELAPSED=0
@@ -42,7 +39,6 @@ if [ $ELAPSED -ge $MAX_WAIT ]; then
     exit 1
 fi
 
-# Step 2: Check if Registry is available (using localhost for host check)
 echo -e "\n${YELLOW}[2/5]${NC} Checking if Registry is available..."
 if curl -s -f "$REGISTRY_URL_CHECK/nifi-registry" > /dev/null 2>&1; then
     echo -e "${GREEN}      Registry is available${NC}"
@@ -51,25 +47,20 @@ else
     exit 0
 fi
 
-# Step 3: Authenticate to NiFi
 echo -e "\n${YELLOW}[3/5]${NC} Authenticating to NiFi..."
 
-# Get access token using LDAP credentials
 TOKEN_RESPONSE=$(curl -k -s -X POST "$NIFI_URL/access/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "username=$NIFI_USERNAME&password=$NIFI_PASSWORD")
 
 if [ -z "$TOKEN_RESPONSE" ] || [ "$TOKEN_RESPONSE" == "Unable to authenticate" ]; then
     echo -e "${RED}      Authentication failed${NC}"
-    echo -e "${YELLOW}      Please configure Registry client manually:${NC}"
-    echo -e "${YELLOW}      Controller Settings -> Registry Clients -> Add${NC}"
     exit 1
 fi
 
 TOKEN="$TOKEN_RESPONSE"
 echo -e "${GREEN}      Authenticated as $NIFI_USERNAME${NC}"
 
-# Step 4: Check if Registry client already exists
 echo -e "\n${YELLOW}[4/5]${NC} Checking existing Registry clients..."
 
 EXISTING=$(curl -k -s -H "Authorization: Bearer $TOKEN" \
@@ -82,7 +73,6 @@ fi
 
 echo -e "${YELLOW}      No existing Registry client found${NC}"
 
-# Step 5: Create registry client (using Docker network URL for NiFi)
 echo -e "\n${YELLOW}[5/5]${NC} Creating Registry client..."
 
 PAYLOAD=$(cat <<EOF
@@ -102,7 +92,6 @@ PAYLOAD=$(cat <<EOF
 EOF
 )
 
-
 RESULT=$(curl -k -s -X POST "$NIFI_URL/controller/registry-clients" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
@@ -115,7 +104,6 @@ if echo "$RESULT" | grep -q "\"name\":\"$REGISTRY_NAME\""; then
 else
     echo -e "${RED}      Failed to create Registry client${NC}"
     echo -e "${YELLOW}      Error: $(echo "$RESULT" | grep -o '"message":"[^"]*"' || echo "Unknown error")${NC}"
-    echo -e "${YELLOW}      You can add it manually via NiFi UI${NC}"
     exit 1
 fi
 
