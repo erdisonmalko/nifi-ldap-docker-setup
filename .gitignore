@@ -3,3 +3,5 @@ DStore
 *.jar
 *.war
 .env
+
+./scripts/linux/setup-nifi-templates.sh

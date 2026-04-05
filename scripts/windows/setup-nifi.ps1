@@ -229,6 +229,10 @@ Write-Host "========================================================`n" -Foregro
 Write-Host "Step 9: Configuring NiFi Registry connection (optional)" -ForegroundColor Cyan
 Write-Host "-------------------------------------------------------`n" -ForegroundColor DarkGray
 
+# THIS WILL PROBABLY FAIL ON WINDOWS DUE TO BASH SCRIPT, 
+# BUT WE CAN STILL TRY TO RUN IT IF WSL IS AVAILABLE. OTHERWISE, 
+# USER CAN CONFIGURE REGISTRY MANUALLY USING THE UI.
+
 if (Test-Path ".\scripts\linux\configure-registry.sh") {
     Write-Host "Running Registry configuration..." -ForegroundColor Yellow
     $ErrorActionPreference = "Continue"

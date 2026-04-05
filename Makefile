@@ -1,10 +1,10 @@
-.PHONY: set-up, set-up-y, down, restart, logs
+.PHONY: set-up set-up-y down restart logs
 
 set-up:
-	powershell -NoProfile -ExecutionPolicy Bypass -Command "& './scripts/windows/setup-nifi.ps1'"
+	bash ./scripts/linux/setup-nifi.sh
 
 set-up-y:
-	powershell -NoProfile -ExecutionPolicy Bypass -Command "& './scripts/windows/setup-nifi.ps1' -SkipConfirmation"
+	bash ./scripts/linux/setup-nifi.sh --skip-confirmation
 
 down:
 	docker-compose -f docker-compose.yml down

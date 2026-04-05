@@ -2,6 +2,10 @@
 # NiFi Template Setup - Controller Services and Oracle Flow
 # This script automatically creates Controller Services and Process Groups
 
+# =======================================================
+# OPTIONAL SCRIPT TO AUTOMATE TEMPLATE CREATION (YOU CAN AVOID THIS)
+# =======================================================
+
 set -e
 
 NIFI_URL="https://localhost:8443/nifi-api"
