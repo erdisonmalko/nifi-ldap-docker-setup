@@ -4,9 +4,15 @@ Complete guide to set up Apache NiFi with LDAP authentication for multi-user env
 
 ## Quick Start
 
-```powershell
-git clone <your-repo>
+```bash
+git clone <repo-url>
 cd nifi-docker
+bash ./scripts/linux/setup-nifi.sh
+```
+
+## Or Powershell
+
+```powershell
 .\scripts\windows\setup-nifi.ps1
 ```
 
@@ -44,7 +50,7 @@ After setup completes:
 |---------|-----|---------|
 | NiFi | https://localhost:8443/nifi | Main application |
 | LDAP Admin | http://localhost:8081 | Manage users |
-| NiFi Registry | http://localhost:18080 | Version control |
+| NiFi Registry | http://localhost:18080/nifi-registry | Version control |
 
 **Users created:**
 - `superAdmin` / `password123` (admin)
@@ -58,8 +64,8 @@ After setup completes:
 
 Run the setup script:
 
-```powershell
-.\scripts\windows\setup-nifi.ps1
+```bash
+./scripts/linux/setup-nifi.sh
 ```
 
 The script will:
