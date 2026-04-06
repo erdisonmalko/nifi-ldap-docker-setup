@@ -5,7 +5,7 @@ Complete guide to set up Apache NiFi with LDAP authentication for multi-user env
 ## Quick Start
 
 ```bash
-git clone <repo-url>
+git clone <this-repo-url>
 cd nifi-docker
 bash ./scripts/linux/setup-nifi.sh
 ```
